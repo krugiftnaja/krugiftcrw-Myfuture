@@ -4253,3 +4253,57 @@ window.TEACHER_PROFILE = {
 
 </body>
 </html>
+.setItem(STORAGE_KEYS.postTeaching, JSON.stringify({ "ref-class": "ม.3/12" }));
+        restoreSavedDrafts();
+        assertTest("11. กู้คืนฟอร์มสะท้อนคิดครูผู้สอนประวัติร่างสำเร็จ", document.getElementById("ref-class").value === "ม.3/12");
+        localStorage.removeItem(STORAGE_KEYS.postTeaching);
+
+        localStorage.setItem(STORAGE_KEYS.supervision, JSON.stringify({ "sup-observer": "ศน.อานนท์" }));
+        restoreSavedDrafts();
+        assertTest("12. กู้คืนข้อมูลประวัติผู้นิเทศสังเกตการณ์สำเร็จ", document.getElementById("sup-observer").value === "ศน.อานนท์");
+        localStorage.removeItem(STORAGE_KEYS.supervision);
+
+        localStorage.setItem(STORAGE_KEYS.postTeaching, "corrupted_bad_json_payload");
+        let safeRecover = true;
+        try { restoreSavedDrafts(); } catch (e) { safeRecover = false; }
+        assertTest("13. ระบบป้องกันการล่มตัวจากการมีแคชบราวเซอร์เสียหาย", safeRecover === true);
+        localStorage.removeItem(STORAGE_KEYS.postTeaching);
+
+        assertTest("14. ปุ่มสั่งปริ้นใบ A4 ปรากฏอยู่ในหน้าต่างระบบ", document.getElementById("btn-print") !== null);
+
+        togglePresentationMode(true);
+        assertTest("15. เปิดการจำลองโหมดนักเรียนขึ้นจอสไลด์นำเสนอสำเร็จ", document.getElementById("presentation-overlay").classList.contains("hidden") === false);
+        togglePresentationMode(false);
+
+        assertTest("16. ตัวควบคุมแผงนาฬิกาจับเวลาแนะแนวปรากฏครบ", document.getElementById("pres-timer-time") !== null);
+
+        const leakPayload = {
+          recordType: "TEST",
+          version: "1.0",
+          timestamp: new Date().toISOString(),
+          riasecScore: [5, 4, 3, 2, 1, 0]
+        };
+        assertTest("17. บล็อกและคัดกรองความปลอดภัยกรณีมีประวัติคะแนน RIASEC เด็กติดไปในข้อมูลส่งออนไลน์", validateSubmissionPayload(leakPayload, "TEST") === false);
+        assertTest("18. การส่งผลนิเทศออนไลน์ปิดการส่งออกข้อมูลโดยอัตโนมัติเป็นค่าเริ่มต้น", PLAN_CONFIG.enableOnlineSubmission === false);
+        assertTest("19. แบบประเมินผลบันทึกครูมีช่องและปุ่มระบุสถานะรายงาน", document.getElementById("ref-status") !== null && document.getElementById("sup-status") !== null);
+
+        const allIds = Array.from(document.querySelectorAll('[id]')).map(el => el.id);
+        const uniqueIds = new Set(allIds);
+        assertTest("20. ตรวจสอบความถูกต้องไม่มีค่า ID ซ้ำกันในโค้ดหลักหน้าเว็บ", allIds.length === uniqueIds.size);
+
+        if (fails === 0) {
+          console.log("%c=======================================================", "color: #10B981; font-weight: bold;");
+          console.log("%c✓ ผ่านเกณฑ์การประเมินจำลองการทดสอบ 100% (20/20 PASS)!", "color: #10B981; font-weight: bold; font-size: 1.1rem;");
+          console.log("%c=======================================================", "color: #10B981; font-weight: bold;");
+        } else {
+          console.error(`การทดสอบพบบกพร่องจำนวน ${fails} ข้อการทดสอบ`);
+        }
+      } catch (e) {
+        console.error("การประเมินระบบจำลองทดสอบขัดข้องเชิงระบบ: ", e);
+      }
+    }
+  </script>
+</body>
+
+</html>
+ 
